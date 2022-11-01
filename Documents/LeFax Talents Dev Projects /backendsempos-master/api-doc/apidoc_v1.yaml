@@ -1,0 +1,4151 @@
+openapi: 3.0.2
+info:
+  title: Onebaz API
+  version: '1.0'
+  contact:
+    name: Onebaz
+    email: sempos@gmx.com
+    url: www.onebaz.com
+  description: API for the Onebaz back-end system
+servers:
+  - url: 'https://api.onebaz.com/v1/base'
+  - url: 'https://api.onebaz.com/v1/{tenant}'
+    variables:
+      tenant:
+        description: Tenant name
+        default: lefax
+        enum:
+          - lefax
+          - yellowshop
+          - salaudbar
+          - idealdallas
+  - url: 'http://localhost:3000/v1/base'
+  - url: 'http://localhost:3000/v1/{tenant}'
+    variables:
+      tenant:
+        description: Tenant name
+        default: velocity
+        enum:
+          - velocity
+          - yellowshop
+          - salaudbar
+          - idealdallas
+paths:
+  /admins:
+    post:
+      summary: Create a new admin account
+      operationId: post-admins
+      responses:
+        '201':
+          description: Created
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                oneOf:
+                  - properties:
+                      id:
+                        type: string
+                      token:
+                        type: string
+                      url:
+                        type: string
+                  - properties:
+                      id:
+                        type: string
+                      url:
+                        type: string
+                type: object
+      description: 'Create a new admin account '
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                firstname:
+                  type: string
+                lastname:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                phone:
+                  type: string
+                password:
+                  type: string
+                  format: password
+              required:
+                - firstname
+                - lastname
+                - email
+                - password
+      tags:
+        - Admins
+      security:
+        - Admin Api Key: []
+    get:
+      summary: Get all admins
+      operationId: get-admins
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  count:
+                    type: integer
+                  currentPage:
+                    type: integer
+                  pages:
+                    type: integer
+                  prev:
+                    type: string
+                    format: uri
+                  next:
+                    type: string
+                    format: uri
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Admin'
+      security:
+        - Admin Api Key: []
+      parameters:
+        - schema:
+            type: integer
+          in: query
+          name: page
+        - schema:
+            type: integer
+          in: query
+          name: limit
+      tags:
+        - Admins
+  /admins/email/verify:
+    get:
+      summary: Check email availability for admin
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+      operationId: get-email-verify
+      description: Check if the email is already used by another admin account
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: email
+          required: true
+      tags:
+        - Admins
+    parameters: []
+  '/admins/email/authenticate/{token}':
+    patch:
+      summary: Authenticate email
+      tags:
+        - Admins
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+      operationId: 'get-email-authenticate-:token'
+    parameters:
+      - schema:
+          type: string
+        name: token
+        in: path
+        required: true
+  /admins/login:
+    post:
+      summary: Log in to an admin account
+      operationId: post-admin-login
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  token:
+                    type: string
+                  url:
+                    type: string
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+              required:
+                - email
+                - password
+      tags:
+        - Admins
+    parameters: []
+  /admins/logout:
+    patch:
+      summary: Log out from an admin account
+      tags:
+        - Admins
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+      operationId: get-admins-logout
+      security:
+        - Admin Api Key: []
+  '/admins/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Get an admin by id
+      tags:
+        - Admins
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+      operationId: get-admins-id
+      security:
+        - Admin Api Key: []
+    delete:
+      summary: Delete an admin account
+      operationId: delete-admins-id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+      security:
+        - Admin Api Key: []
+      tags:
+        - Admins
+  '/admins/{id}/infos':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    patch:
+      summary: Update admin infos
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+      operationId: get-admins-id-infos
+      security:
+        - Admin Api Key: []
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                firstname:
+                  type: string
+                lastname:
+                  type: string
+                phone:
+                  type: string
+      tags:
+        - Admins
+  '/admins/{id}/password':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    patch:
+      summary: Update admin password
+      tags:
+        - Admins
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+      operationId: get-admins-id-password
+      security:
+        - Admin Api Key: []
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                  format: password
+              required:
+                - password
+  /admins/reset-password/token:
+    get:
+      summary: Request url to reset password
+      tags:
+        - Admins
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+      operationId: get-admins-reset-password
+      parameters:
+        - schema:
+            type: string
+            format: email
+          in: query
+          name: email
+          required: true
+      description: ''
+    parameters: []
+  '/admins/reset-password/{token}':
+    parameters:
+      - schema:
+          type: string
+        name: token
+        in: path
+        required: true
+    patch:
+      summary: Reset password
+      tags:
+        - Admins
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+      operationId: get-admins-reset-password-token
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                  format: password
+              required:
+                - password
+  /tenants:
+    post:
+      summary: Create a new tenant account
+      tags:
+        - Tenants
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  firstname:
+                    type: string
+                  lastname:
+                    type: string
+                  token:
+                    type: string
+                  url:
+                    type: string
+                    format: uri
+      operationId: add-tenant
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                firstname:
+                  type: string
+                lastname:
+                  type: string
+                core_branch:
+                  type: string
+                business_type:
+                  type: string
+                subdomain:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                phone:
+                  type: string
+                country:
+                  type: string
+                phone_code:
+                  type: string
+                currency_code:
+                  type: string
+                password:
+                  type: string
+                  format: password
+              required:
+                - firstname
+                - lastname
+                - core_branch
+                - business_type
+                - subdomain
+                - email
+                - phone
+                - country
+                - phone_code
+                - currency_code
+                - password
+    get:
+      summary: Get tenants
+      operationId: get-tenants
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  count:
+                    type: integer
+                  currentPage:
+                    type: integer
+                  pages:
+                    type: integer
+                  prev:
+                    type: string
+                    format: uri
+                  next:
+                    type: string
+                    format: uri
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Tenant'
+      security:
+        - Admin Api Key: []
+      parameters:
+        - schema:
+            type: integer
+          in: query
+          name: page
+        - schema:
+            type: integer
+          in: query
+          name: limit
+      tags:
+        - Tenants
+  /tenants/email/verify:
+    get:
+      summary: Check if the email is already used by another tenant account
+      tags:
+        - Tenants
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+      operationId: get-tenants-email-verify
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: email
+          required: true
+  /tenants/subdomain/verify:
+    get:
+      summary: Check if the subdomain is already used by another tenant account
+      tags:
+        - Tenants
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - properties:
+                      code:
+                        type: string
+                      message:
+                        type: string
+                      url:
+                        type: string
+                        format: uri
+                  - properties:
+                      code:
+                        type: string
+                      message:
+                        type: string
+                type: object
+      operationId: get-tenants-subdomain-verify
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: subDomain
+  '/tenants/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Get tenant by id
+      tags:
+        - Tenants
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+      operationId: get-tenants-id
+      security:
+        - Admin Api Key: []
+    delete:
+      summary: Delete tenant
+      operationId: delete-tenants-id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+      security:
+        - Admin Api Key: []
+      tags:
+        - Tenants
+  '/tenants/{id}/activate':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    patch:
+      summary: Activate tenant
+      tags:
+        - Tenants
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/Tenant'
+      operationId: get-tenants-id-activate
+      security:
+        - Admin Api Key: []
+  '/tenants/{id}/desactivate':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    patch:
+      summary: Desactivate tenant
+      tags:
+        - Tenants
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/Tenant'
+      operationId: get-tenants-id-desactivate
+      security:
+        - Admin Api Key: []
+  /employees:
+    post:
+      summary: Add a employee
+      tags:
+        - Employees
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/GetEmployee'
+                  url:
+                    type: string
+                    format: uri
+      operationId: add-employee
+      security:
+        - Tenant User Api Key: []
+      requestBody:
+        $ref: '#/components/requestBodies/AddEmployee'
+    get:
+      summary: Get all employees
+      operationId: get-employees
+      responses:
+        '200':
+          $ref: '#/components/responses/GetEmployees'
+      tags:
+        - Employees
+      security:
+        - Tenant User Api Key: []
+      parameters:
+        - schema:
+            type: integer
+          in: query
+          name: page
+        - schema:
+            type: integer
+          in: query
+          name: limit
+  '/employees/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Get employee by id
+      tags:
+        - Employees
+      responses:
+        '200':
+          $ref: '#/components/responses/GetEmployee'
+      operationId: get-employees-id
+      security:
+        - Tenant User Api Key: []
+    patch:
+      summary: Update employee
+      operationId: patch-employees-id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/GetEmployee'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/GetEmployee'
+                      token:
+                        type: string
+      tags:
+        - Employees
+      security:
+        - Tenant User Api Key: []
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateEmployee'
+    delete:
+      summary: Delete an employee account
+      operationId: delete-employees-id
+      responses:
+        '200':
+          $ref: '#/components/responses/ResponseMessage'
+      tags:
+        - Employees
+      security:
+        - Tenant User Api Key: []
+  /branches:
+    get:
+      summary: Get all branches
+      tags:
+        - Branches
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  count:
+                    type: integer
+                  currentPage:
+                    type: integer
+                  pages:
+                    type: integer
+                  prev:
+                    type: string
+                    format: uri
+                  next:
+                    type: string
+                    format: uri
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Branch'
+      operationId: get-branches
+      security:
+        - Tenant User Api Key: []
+      parameters:
+        - schema:
+            type: integer
+          in: query
+          name: page
+        - schema:
+            type: integer
+          in: query
+          name: limit
+    post:
+      summary: Create a new branch
+      operationId: post-branches
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  url:
+                    type: string
+                    format: uri
+      tags:
+        - Branches
+      security:
+        - Tenant User Api Key: []
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                business_name:
+                  type: string
+                business_type:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                phone:
+                  type: string
+                address:
+                  type: string
+                town:
+                  type: string
+                NIU:
+                  type: string
+                RCCM:
+                  type: string
+    patch:
+      summary: Update core branch modules and set catalog visibility
+      operationId: patch-branches
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  firstname:
+                    type: string
+                  lastname:
+                    type: string
+                  token:
+                    type: string
+      security:
+        - Tenant User Api Key: []
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                modules:
+                  type: array
+                  uniqueItems: true
+                  description: '''treasury'', ''products'', ''marketing'', ''services'', ''payroll'', ''orders'', ''reservations'', ''billing'' or ''consignement'''
+                  items:
+                    type: string
+                isCatalogOnline:
+                  type: boolean
+                  default: true
+              required:
+                - modules
+                - isCatalogOnline
+          application/json:
+            schema:
+              type: object
+              properties: {}
+        description: ''
+      tags:
+        - Branches
+      description: ''
+  /branches/corebranch:
+    get:
+      summary: Get core branch
+      tags:
+        - Branches
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Branch'
+      operationId: get-branches-corebranch
+      security:
+        - Tenant User Api Key: []
+  '/branches/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Get branch by id
+      tags:
+        - Branches
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Branch'
+      operationId: get-branches-id
+      security:
+        - Tenant User Api Key: []
+    patch:
+      summary: Update branch
+      operationId: patch-branches-id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Branch'
+      security:
+        - Tenant User Api Key: []
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                business_name:
+                  type: string
+                business_type:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                phone:
+                  type: string
+                address:
+                  type: string
+                town:
+                  type: string
+                NIU:
+                  type: string
+                RCCM:
+                  type: string
+      tags:
+        - Branches
+    delete:
+      summary: Delete branch
+      operationId: delete-branches-id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+      security:
+        - Tenant User Api Key: []
+      tags:
+        - Branches
+  /location:
+    get:
+      summary: Get location from user ip address
+      tags:
+        - Location
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  country_name:
+                    type: string
+                  iso2_code:
+                    type: string
+                  iso3_code:
+                    type: string
+                  phone_code:
+                    type: string
+                  currency_code:
+                    type: string
+      operationId: get-location
+      parameters:
+        - schema:
+            type: string
+            format: ipv4
+          in: query
+          name: ip
+          required: true
+  /customersgroups:
+    get:
+      summary: Get all customers groups
+      responses:
+        '200':
+          description: OK
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  count:
+                    type: integer
+                  currentPage:
+                    type: integer
+                  pages:
+                    type: integer
+                  prev:
+                    type: string
+                    format: uri
+                    nullable: true
+                  next:
+                    type: string
+                    format: uri
+                    nullable: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CustomersGroup'
+      operationId: get-customersgroups
+      security:
+        - Tenant User Api Key: []
+      parameters:
+        - schema:
+            type: integer
+          in: query
+          name: page
+        - schema:
+            type: integer
+          in: query
+          name: limit
+      tags:
+        - CustomersGroups
+    parameters: []
+    post:
+      summary: Create a new customers group
+      operationId: post-customersgroups
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CustomersGroup'
+                  url:
+                    type: string
+                    format: uri
+      security:
+        - Tenant User Api Key: []
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+              required:
+                - name
+      tags:
+        - CustomersGroups
+  /customersgroups/verify:
+    get:
+      summary: Check name availability for customers group
+      tags:
+        - CustomersGroups
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+      operationId: get-customersgroups-name-verify
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: name
+          required: true
+      security:
+        - Tenant User Api Key: []
+    parameters: []
+  '/customersgroups/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Get a customers group by id
+      tags:
+        - CustomersGroups
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomersGroup'
+      operationId: get-customersgroups-id
+      security:
+        - Tenant User Api Key: []
+    patch:
+      summary: Update a customers group name
+      operationId: patch-customersgroups-id
+      security:
+        - Tenant User Api Key: []
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+      tags:
+        - CustomersGroups
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomersGroup'
+    delete:
+      summary: Delete a customers group
+      operationId: delete-customersgroups-id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+      security:
+        - Tenant User Api Key: []
+      tags:
+        - CustomersGroups
+  /customers:
+    get:
+      summary: Get all customers
+      tags:
+        - Customers
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  count:
+                    type: integer
+                  currentPage:
+                    type: integer
+                  pages:
+                    type: integer
+                  prev:
+                    type: string
+                    format: uri
+                    nullable: true
+                  next:
+                    type: string
+                    format: uri
+                    nullable: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Customer'
+      operationId: get-customers
+      security:
+        - Tenant User Api Key: []
+      parameters:
+        - schema:
+            type: integer
+          in: query
+          name: page
+        - schema:
+            type: integer
+          in: query
+          name: limit
+    post:
+      summary: Create a new customer
+      operationId: post-customers
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Customer'
+                  url:
+                    type: string
+                    format: uri
+      security:
+        - Tenant User Api Key: []
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                type:
+                  type: string
+                  enum:
+                    - individual
+                    - corporate
+                email:
+                  type: string
+                phones:
+                  type: array
+                  items:
+                    type: string
+                fax:
+                  type: string
+                customers_groups:
+                  type: array
+                  items:
+                    type: string
+                sendMarketingEmails:
+                  type: boolean
+                street:
+                  type: string
+                city:
+                  type: string
+                post_code:
+                  type: string
+                state:
+                  type: string
+                country:
+                  type: string
+                birth_date:
+                  type: string
+                gender:
+                  type: string
+                  enum:
+                    - female
+                    - male
+                website:
+                  type: string
+                  format: uri
+                enableLoyalty:
+                  type: boolean
+              required:
+                - name
+                - type
+      tags:
+        - Customers
+    parameters: []
+  /customers/verify:
+    get:
+      summary: Check name availability for customer
+      tags:
+        - Customers
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+      operationId: get-customers-verify
+      security:
+        - Tenant User Api Key: []
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: name
+          required: true
+  '/customers/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Get a customer by id
+      tags:
+        - Customers
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+      operationId: get-customers-id
+      security:
+        - Tenant User Api Key: []
+    patch:
+      summary: Update a customer
+      operationId: patch-customers-id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+      security:
+        - Tenant User Api Key: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                type:
+                  type: string
+                  enum:
+                    - person
+                    - company
+                email:
+                  type: string
+                phones_to_add:
+                  type: array
+                  items:
+                    type: string
+                phones_to_remove:
+                  type: array
+                  items:
+                    type: string
+                fax:
+                  type: string
+                customers_groups_to_add:
+                  type: array
+                  items:
+                    type: string
+                customers_groups_to_remove:
+                  type: array
+                  items:
+                    type: string
+                sendMarketingEmails:
+                  type: boolean
+                street:
+                  type: string
+                city:
+                  type: string
+                post_code:
+                  type: string
+                state:
+                  type: string
+                country:
+                  type: string
+                birth_date:
+                  type: string
+                gender:
+                  type: string
+                  enum:
+                    - female
+                    - male
+                website:
+                  type: string
+                  format: uri
+                enableLoyalty:
+                  type: boolean
+      tags:
+        - Customers
+    delete:
+      summary: Delete a customer
+      operationId: delete-customers-id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+      security:
+        - Tenant User Api Key: []
+      tags:
+        - Customers
+  /paymenttypes:
+    get:
+      summary: Get all payment types
+      tags:
+        - PaymentTypes
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  count:
+                    type: integer
+                  currentPage:
+                    type: integer
+                  pages:
+                    type: integer
+                  prev:
+                    type: string
+                    format: uri
+                  next:
+                    type: string
+                    format: uri
+                  data:
+                    $ref: '#/components/schemas/PaymentType'
+      operationId: get-paymenttypes
+      security:
+        - Tenant User Api Key: []
+      parameters:
+        - schema:
+            type: integer
+          in: query
+          name: page
+        - schema:
+            type: integer
+          in: query
+          name: limit
+    post:
+      summary: Create a new payment type
+      operationId: post-paymenttypes
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentType'
+      security:
+        - Tenant User Api Key: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                type:
+                  type: string
+                  enum:
+                    - '''cash'''
+                    - '''mobile-banking'''
+                    - '''credit-card'''
+              required:
+                - name
+                - type
+      tags:
+        - PaymentTypes
+  /paymenttypes/verify:
+    get:
+      summary: Check if the name is already used for payment type
+      tags:
+        - PaymentTypes
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+      operationId: get-paymenttypes-verify
+      security:
+        - Tenant User Api Key: []
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: name
+          required: true
+  '/paymenttypes/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Get a payment type by id
+      tags:
+        - PaymentTypes
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentType'
+      operationId: 'get-paymenttypes-:id'
+      security:
+        - Tenant User Api Key: []
+    patch:
+      summary: Update a payment type
+      operationId: 'patch-paymenttypes-:id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentType'
+      security:
+        - Tenant User Api Key: []
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                type:
+                  type: string
+                  enum:
+                    - '''cash'''
+                    - '''mobile-banking'''
+                    - '''credit-card'''
+      tags:
+        - PaymentTypes
+    delete:
+      summary: Delete a payment type
+      operationId: 'delete-paymenttypes-:id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+      security:
+        - Tenant User Api Key: []
+      tags:
+        - PaymentTypes
+  '/customersgroups/{id}/customers':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Get customers of a group
+      tags:
+        - CustomersGroups
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  count:
+                    type: integer
+                  currentPage:
+                    type: integer
+                  pages:
+                    type: integer
+                  prev:
+                    type: string
+                    nullable: true
+                  next:
+                    type: string
+                    nullable: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Customer'
+      operationId: get-customersgroups-id-customers
+      security:
+        - Tenant User Api Key: []
+      parameters:
+        - schema:
+            type: integer
+          in: query
+          name: page
+        - schema:
+            type: integer
+          in: query
+          name: limit
+  /customers/search:
+    get:
+      summary: Get a customer by code
+      tags:
+        - Customers
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+      operationId: get-customers-search
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: code
+          required: true
+      security:
+        - Tenant User Api Key: []
+  /roles:
+    get:
+      summary: Get all roles
+      tags:
+        - Roles
+      responses:
+        '200':
+          $ref: '#/components/responses/GetRoles'
+      operationId: get-roles
+      security:
+        - Tenant User Api Key: []
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+    post:
+      summary: Add a role
+      operationId: post-roles
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/GetRole'
+                  url:
+                    type: string
+                    format: uri
+      security:
+        - Tenant User Api Key: []
+      requestBody:
+        $ref: '#/components/requestBodies/AddRole'
+      tags:
+        - Roles
+  '/roles/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Get a role by id
+      tags:
+        - Roles
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetRole'
+      operationId: get-roles-id
+      security:
+        - Tenant User Api Key: []
+    patch:
+      summary: Update a role
+      operationId: patch-roles-id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetRole'
+      security:
+        - Tenant User Api Key: []
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateRole'
+      tags:
+        - Roles
+    delete:
+      summary: Delete a role
+      operationId: delete-roles-id
+      responses:
+        '200':
+          $ref: '#/components/responses/ResponseMessage'
+      security:
+        - Tenant User Api Key: []
+      tags:
+        - Roles
+  /roles/verify:
+    get:
+      summary: Check name availability for a new role
+      tags:
+        - Roles
+      responses:
+        '200':
+          $ref: '#/components/responses/ResponseMessage'
+      operationId: get-roles-verify
+      parameters:
+        - $ref: '#/components/parameters/name'
+      security:
+        - Tenant User Api Key: []
+  /employees/verify:
+    get:
+      summary: Your GET endpoint
+      tags:
+        - Employees
+      responses:
+        '200':
+          $ref: '#/components/responses/ResponseMessage'
+      operationId: get-employees-verify
+      security:
+        - Tenant User Api Key: []
+      parameters:
+        - schema:
+            type: string
+            format: email
+          in: query
+          name: email
+          allowEmptyValue: true
+          required: true
+  /employees/login:
+    get:
+      summary: Log in to employee account
+      tags:
+        - Employees
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/GetEmployee'
+                  token:
+                    type: string
+      operationId: get-employees-login
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+              required:
+                - email
+                - password
+  /employees/logout:
+    patch:
+      summary: Log out from an employee account
+      operationId: patch-employees-logout
+      responses:
+        '200':
+          $ref: '#/components/responses/ResponseMessage'
+      security:
+        - Tenant User Api Key: []
+      tags:
+        - Employees
+  /employees/reset-password-token:
+    patch:
+      summary: Request a reset-password token
+      operationId: patch-employees-reset-password-token
+      responses:
+        '200':
+          $ref: '#/components/responses/ResponseMessage'
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+              required:
+                - email
+      tags:
+        - Employees
+  /employees/reset-password:
+    patch:
+      summary: Reset password
+      operationId: patch-employees-reset-password
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/GetEmployee'
+                  token:
+                    type: string
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                token:
+                  type: string
+                  minLength: 6
+                  maxLength: 6
+                password:
+                  type: string
+              required:
+                - email
+                - token
+                - password
+      tags:
+        - Employees
+  '/roles/{role}/employees':
+    get:
+      summary: Get employees that have a role
+      tags:
+        - Roles
+      responses:
+        '200':
+          $ref: '#/components/responses/GetEmployeesByRole'
+      operationId: 'get-roles-:role-customers'
+      security:
+        - Tenant User Api Key: []
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+    parameters:
+      - schema:
+          type: string
+        name: role
+        in: path
+        required: true
+  /purchases:
+    get:
+      summary: Get purchases
+      tags:
+        - Purchases
+      responses:
+        '200':
+          $ref: '#/components/responses/GetPurchases'
+      operationId: get-purchases
+      security:
+        - Tenant User Api Key: []
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+    post:
+      summary: Add a purchase
+      operationId: post-purchases
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/GetPurchase'
+                  url:
+                    type: string
+                    format: uri
+      security:
+        - Tenant User Api Key: []
+      requestBody:
+        $ref: '#/components/requestBodies/AddPurchase'
+      tags:
+        - Purchases
+  '/purchases/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Get a purchase by id
+      tags:
+        - Purchases
+      responses:
+        '200':
+          $ref: '#/components/responses/GetPurchase'
+      operationId: get-purchases-id
+      security:
+        - Tenant User Api Key: []
+    patch:
+      summary: Update a purchase
+      operationId: patch-purchases-id
+      responses:
+        '200':
+          $ref: '#/components/responses/GetPurchase'
+      security:
+        - Tenant User Api Key: []
+      requestBody:
+        $ref: '#/components/requestBodies/UpdatePurchase'
+      tags:
+        - Purchases
+  /vendors:
+    get:
+      summary: Get vendors
+      tags:
+        - Vendors
+      responses:
+        '200':
+          $ref: '#/components/responses/GetVendors'
+      operationId: get-vendors
+      security:
+        - Tenant User Api Key: []
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+    post:
+      summary: Add a new vendor
+      operationId: post-vendors
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/GetVendor'
+                  url:
+                    type: string
+                    format: uri
+      security:
+        - Tenant User Api Key: []
+      requestBody:
+        $ref: '#/components/requestBodies/AddVendor'
+      tags:
+        - Vendors
+  '/vendors/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Get a vendor by id
+      tags:
+        - Vendors
+      responses:
+        '200':
+          $ref: '#/components/responses/GetVendor'
+      operationId: get-vendors-id
+      security:
+        - Tenant User Api Key: []
+      description: ''
+    patch:
+      summary: ''
+      operationId: patch-vendors-id
+      responses:
+        '200':
+          $ref: '#/components/responses/GetVendor'
+      security:
+        - Tenant User Api Key: []
+      tags:
+        - Vendors
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateVendor'
+  /vendors/verify:
+    get:
+      summary: Check the availability of a name fo vendor
+      tags:
+        - Vendors
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+      operationId: get-vendors-verify
+      security:
+        - Tenant User Api Key: []
+      parameters:
+        - $ref: '#/components/parameters/name'
+  /transfers:
+    get:
+      summary: Get transfers
+      tags:
+        - Transfers
+      responses:
+        '200':
+          $ref: '#/components/responses/GetTransfers'
+      operationId: get-transfers
+      security:
+        - Tenant User Api Key: []
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transferred_by:
+                  type: array
+                  items:
+                    type: string
+                transfer_to:
+                  type: array
+                  items:
+                    type: string
+                status:
+                  type: array
+                  items:
+                    type: string
+                start_date:
+                  type: string
+                end_date:
+                  type: string
+    post:
+      summary: Add a new transfer
+      operationId: post-transfers
+      responses:
+        '201':
+          $ref: '#/components/responses/GetTransfer'
+      security:
+        - Tenant User Api Key: []
+      requestBody:
+        $ref: '#/components/requestBodies/AddTransfer'
+      tags:
+        - Transfers
+  '/transfers/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Get a transfer by id
+      tags:
+        - Transfers
+      responses:
+        '200':
+          $ref: '#/components/responses/GetTransfer'
+      operationId: get-transfers-id
+      security:
+        - Tenant User Api Key: []
+    patch:
+      summary: Update a transfer
+      operationId: patch-transfers-id
+      responses:
+        '200':
+          $ref: '#/components/responses/GetTransfer'
+      security:
+        - Tenant User Api Key: []
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateTransfer'
+      tags:
+        - Transfers
+  /transfers/verify:
+    get:
+      summary: Check the availability of a transfer number
+      tags:
+        - Transfers
+      operationId: get-transfers-verify
+      security:
+        - Tenant User Api Key: []
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: transfer_number
+          required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/ResponseMessage'
+  /transaction_categories:
+    get:
+      summary: Get treasury transaction categories
+      tags:
+        - Treasury Transaction Category
+      responses:
+        '200':
+          $ref: '#/components/responses/GetTreasuryTransactionCategories'
+      operationId: get-transaction_categories
+      security:
+        - Tenant User Api Key: []
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: type
+    post:
+      summary: Add a treasury transaction category
+      operationId: post-transaction_categories
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/GetTreasuryTransactionCategory'
+                  url:
+                    type: string
+                    format: uri
+      security:
+        - Tenant User Api Key: []
+      requestBody:
+        $ref: '#/components/requestBodies/AddTreasuryTransactionCategory'
+      tags:
+        - Treasury Transaction Category
+  '/transaction_categories/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Update a treasury transaction category
+      tags:
+        - Treasury Transaction Category
+      responses:
+        '200':
+          $ref: '#/components/responses/GetTreasuryTransactionCategory'
+      operationId: get-transaction_categories-id
+      security:
+        - Tenant User Api Key: []
+    patch:
+      summary: Update a treasury transaction category
+      operationId: patch-transaction_categories-id
+      responses:
+        '200':
+          $ref: '#/components/responses/GetTreasuryTransactionCategories'
+      security:
+        - Tenant User Api Key: []
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateTreasuryTransactionsCategory'
+      tags:
+        - Treasury Transaction Category
+    delete:
+      summary: Delete a treasury transaction category
+      operationId: delete-transaction_categories-id
+      responses:
+        '200':
+          $ref: '#/components/responses/ResponseMessage'
+      security:
+        - Tenant User Api Key: []
+      tags:
+        - Treasury Transaction Category
+  /transaction_categories/verify:
+    get:
+      summary: Check the availability of a category name
+      tags:
+        - Treasury Transaction Category
+      responses:
+        '200':
+          $ref: '#/components/responses/ResponseMessage'
+      operationId: get-transaction_categories-verify
+      security:
+        - Tenant User Api Key: []
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: name
+          required: true
+  /transactions:
+    get:
+      summary: Get transactions
+      tags:
+        - Cash Flow Transactions
+      responses:
+        '200':
+          $ref: '#/components/responses/GetCashFlowTransactions'
+      operationId: get-transactions
+      security:
+        - Tenant User Api Key: []
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                types:
+                  type: array
+                  uniqueItems: true
+                  minItems: 0
+                  maxItems: 2
+                  items:
+                    type: string
+                    enum:
+                      - collection
+                      - disbursement
+                min_amount:
+                  type: number
+                max_amount:
+                  type: integer
+                min_tax:
+                  type: integer
+                max_tax:
+                  type: number
+                start_billing_date:
+                  type: string
+                  format: date
+                end_billing_date:
+                  type: string
+                  format: date
+                start_payment_date:
+                  type: string
+                  format: date
+                end_payment_date:
+                  type: string
+                  format: date
+                status:
+                  type: array
+                  uniqueItems: true
+                  minItems: 0
+                  maxItems: 2
+                  items:
+                    type: string
+                    enum:
+                      - underway
+                      - completed
+                categories:
+                  type: array
+                  uniqueItems: true
+                  items:
+                    type: string
+    post:
+      summary: Add a new transaction
+      operationId: post-transactions
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/GetCashFlowTransaction'
+                  url:
+                    type: string
+                    format: uri
+      security:
+        - Tenant User Api Key: []
+      requestBody:
+        $ref: '#/components/requestBodies/AddCashFlowTransaction'
+      tags:
+        - Cash Flow Transactions
+  '/transactions/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Get a transaction by id
+      tags:
+        - Cash Flow Transactions
+      responses:
+        '200':
+          $ref: '#/components/responses/GetCashFlowTransaction'
+      operationId: get-transactions-id
+      security:
+        - Tenant User Api Key: []
+    patch:
+      summary: Update a transaction
+      operationId: patch-transactions-id
+      responses:
+        '200':
+          $ref: '#/components/responses/GetCashFlowTransaction'
+      security:
+        - Tenant User Api Key: []
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateCashFlowTransaction'
+      tags:
+        - Cash Flow Transactions
+    delete:
+      summary: Delete a transaction
+      operationId: delete-transactions-id
+      responses:
+        '200':
+          $ref: '#/components/responses/ResponseMessage'
+      security:
+        - Tenant User Api Key: []
+      tags:
+        - Cash Flow Transactions
+  /transactions/verify:
+    get:
+      summary: Check the availability of a transaction name
+      tags:
+        - Cash Flow Transactions
+      responses:
+        '200':
+          $ref: '#/components/responses/ResponseMessage'
+      operationId: get-transactions-verify
+      security:
+        - Tenant User Api Key: []
+      parameters:
+        - $ref: '#/components/parameters/name'
+  /transactions/reports:
+    get:
+      summary: Get cash flow reports
+      tags:
+        - Cash Flow Transactions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  available_cash_flow:
+                    type: number
+                  reports:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        year:
+                          type: integer
+                          minimum: 1980
+                        month:
+                          type: integer
+                          minimum: 0
+                          maximum: 11
+                        month_in_word:
+                          type: string
+                          enum:
+                            - january
+                            - february
+                            - march
+                            - april
+                            - may
+                            - june
+                            - july
+                            - august
+                            - september
+                            - november
+                            - december
+                            - october
+                        start_cash_flow:
+                          type: number
+                        end_cash_flow:
+                          type: number
+                        collections:
+                          type: object
+                          properties:
+                            amount_underway:
+                              type: number
+                            amount_completed:
+                              type: number
+                            categories:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  name:
+                                    type: string
+                                  transactions:
+                                    type: array
+                                    items:
+                                      $ref: '#/components/schemas/GetCashFlowTransaction'
+                        disbursements:
+                          type: object
+                          properties:
+                            amount_underway:
+                              type: number
+                            amount_completed:
+                              type: number
+                            categories:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  name:
+                                    type: string
+                                  transactions:
+                                    type: array
+                                    items:
+                                      $ref: '#/components/schemas/GetCashFlowTransaction'
+      operationId: get-transactions-reports
+      security:
+        - Tenant User Api Key: []
+components:
+  schemas:
+    Tenant:
+      title: Tenant
+      type: object
+      x-examples: {}
+      properties:
+        id:
+          type: string
+        core_branch:
+          type: string
+        business_type:
+          type: string
+        db_name:
+          type: string
+        owner_id:
+          type: string
+        owner_name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        sub_domain:
+          type: string
+        isActivated:
+          type: boolean
+        url:
+          type: string
+          format: uri
+      description: ''
+    Admin:
+      title: Admin
+      type: object
+      properties:
+        id:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        role:
+          type: string
+        isEmailAuthenticated:
+          type: boolean
+    User:
+      title: User
+      type: object
+      properties:
+        id:
+          type: string
+        tenant:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        isEmailAuthenticated:
+          type: string
+        roles:
+          type: string
+        isActivated:
+          type: string
+    GetEmployee:
+      title: Get Employee
+      type: object
+      properties:
+        id:
+          type: string
+        infos:
+          type: object
+          properties:
+            firstname:
+              type: string
+            lastname:
+              type: string
+            roles:
+              type: array
+              uniqueItems: true
+              minItems: 1
+              maxItems: 1
+              items:
+                type: string
+            role:
+              $ref: '#/components/schemas/GetRole'
+            email:
+              type: string
+              format: email
+            phones:
+              type: array
+              items:
+                type: string
+            legal_identification_number:
+              type: string
+            branches:
+              type: array
+              uniqueItems: true
+              items:
+                type: string
+        app_use_settings:
+          type: object
+          properties:
+            is_app_user:
+              type: boolean
+            email:
+              type: string
+              format: email
+            send_email_reports:
+              type: boolean
+    AddEmployee:
+      title: Add Employee
+      type: object
+      properties:
+        infos:
+          type: object
+          properties:
+            firstname:
+              type: string
+            lastname:
+              type: string
+            role:
+              type: string
+            email:
+              type: string
+              format: email
+            phones:
+              type: array
+              items:
+                type: string
+            legal_identification_number:
+              type: string
+            branches:
+              type: array
+              uniqueItems: true
+              items:
+                type: string
+          required:
+            - firstname
+            - lastname
+            - role
+        app_use_settings:
+          type: object
+          properties:
+            is_app_user:
+              type: boolean
+            credentials:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+            send_email_reports:
+              type: boolean
+    UpdateEmployee:
+      title: Update Employee
+      type: object
+      properties:
+        infos:
+          type: object
+          properties:
+            firstname:
+              type: string
+            lastname:
+              type: string
+            role:
+              type: string
+            email:
+              type: string
+              format: email
+            phones:
+              type: array
+              items:
+                type: string
+            legal_identification_number:
+              type: string
+            branches:
+              type: array
+              uniqueItems: true
+              items:
+                type: string
+        app_use_settings:
+          type: object
+          properties:
+            is_app_user:
+              type: boolean
+            credentials:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+            send_email_reports:
+              type: boolean
+    Branch:
+      title: Branch
+      type: object
+      properties:
+        id:
+          type: string
+        business_name:
+          type: string
+        business_type:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        address:
+          type: string
+        town:
+          type: string
+        NIU:
+          type: string
+        RCCM:
+          type: string
+        isCoreBranch:
+          type: boolean
+        branches:
+          type: array
+          items:
+            $ref: '#/components/schemas/Branch'
+    Customer:
+      title: Customer
+      type: object
+      properties:
+        id:
+          type: string
+        infos:
+          type: object
+          properties:
+            name:
+              type: string
+            type:
+              type: string
+              enum:
+                - person
+                - company
+        contact:
+          type: object
+          properties:
+            email:
+              type: string
+              format: email
+            phones:
+              type: array
+              items:
+                type: string
+            fax:
+              type: string
+            customers_groups:
+              type: object
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+                description:
+                  type: string
+            sendMarketingEmails:
+              type: boolean
+        details:
+          type: object
+          properties:
+            postal_address:
+              type: object
+              properties:
+                street:
+                  type: string
+                city:
+                  type: string
+                post_code:
+                  type: string
+                state:
+                  type: string
+                country:
+                  type: string
+            additional_information:
+              type: object
+              properties:
+                customer_code:
+                  type: string
+                birth_date:
+                  type: string
+                gender:
+                  type: string
+                  enum:
+                    - female
+                    - male
+                website:
+                  type: string
+                  format: uri
+                enableLoyalty:
+                  type: boolean
+    CustomersGroup:
+      title: CustomersGroup
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+    PaymentType:
+      title: PaymentType
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum:
+            - '''cash'''
+            - '''mobile-banking'''
+            - '''credit-card'''
+    GetRole:
+      title: Get Role
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        back_office:
+          type: object
+          properties:
+            allow_access_backoffice:
+              type: boolean
+            product_permissions:
+              type: object
+              properties:
+                products_descriptions:
+                  type: boolean
+                editing_products:
+                  type: boolean
+                editing_definitions:
+                  type: boolean
+                see_products_ingredients:
+                  type: boolean
+            customer_permissions:
+              type: object
+              properties:
+                seeing_customers:
+                  type: boolean
+                editing_customers:
+                  type: boolean
+            inventory_permissions:
+              type: object
+              properties:
+                inventory_viewing_editing:
+                  type: boolean
+                inventory_validation:
+                  type: boolean
+            employee_permissions:
+              type: object
+              properties:
+                seeing_employees:
+                  type: boolean
+                editing_employees:
+                  type: boolean
+            other_permissions:
+              type: object
+              properties:
+                view_reports:
+                  type: boolean
+                setting_access:
+                  type: boolean
+                update_payment_type:
+                  type: boolean
+            marketplace_permissions:
+              type: object
+              properties:
+                viewing_orders:
+                  type: boolean
+                approval_orders:
+                  type: boolean
+                authority_to_create_invoice:
+                  type: boolean
+                brand_category_product:
+                  type: boolean
+                viewing_editing_marketplace_settings:
+                  type: boolean
+        point_of_sale:
+          type: object
+          properties:
+            allow_access_pos:
+              type: boolean
+            terminal_permissions:
+              type: object
+              properties:
+                view_terminal_status:
+                  type: boolean
+                terminal_open_close:
+                  type: boolean
+                see_sales_transactions:
+                  type: boolean
+                access_pos_settings:
+                  type: boolean
+            sale_permissions:
+              type: object
+              properties:
+                refund:
+                  type: boolean
+                cancellation_of_sales:
+                  type: boolean
+                update_payment_type:
+                  type: boolean
+                update_custom_price:
+                  type: boolean
+                park_deletion:
+                  type: boolean
+                basket_deletion:
+                  type: boolean
+            product_permissions:
+              type: object
+              properties:
+                add_remove_favorite:
+                  type: boolean
+                allow_see_others_branches:
+                  type: boolean
+            discount_rates:
+              type: object
+              properties:
+                product_discount_limit:
+                  type: number
+                cart_discount_limit:
+                  type: number
+    UpdateRole:
+      title: Update Role
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        back_office:
+          type: object
+          additionalProperties: false
+          properties:
+            allow_access_backoffice:
+              type: boolean
+            product_permissions:
+              type: object
+              additionalProperties: false
+              properties:
+                products_descriptions:
+                  type: boolean
+                editing_products:
+                  type: boolean
+                editing_definitions:
+                  type: boolean
+                see_products_ingredients:
+                  type: boolean
+            customer_permissions:
+              type: object
+              additionalProperties: false
+              properties:
+                seeing_customers:
+                  type: boolean
+                editing_customers:
+                  type: boolean
+            inventory_permissions:
+              type: object
+              additionalProperties: false
+              properties:
+                inventory_viewing_editing:
+                  type: boolean
+                inventory_validation:
+                  type: boolean
+            employee_permissions:
+              type: object
+              additionalProperties: false
+              properties:
+                seeing_employees:
+                  type: boolean
+                editing_employees:
+                  type: boolean
+            other_permissions:
+              type: object
+              additionalProperties: false
+              properties:
+                view_reports:
+                  type: boolean
+                setting_access:
+                  type: boolean
+                update_payment_type:
+                  type: boolean
+            marketplace_permissions:
+              type: object
+              additionalProperties: false
+              properties:
+                viewing_orders:
+                  type: boolean
+                approval_orders:
+                  type: boolean
+                authority_to_create_invoice:
+                  type: boolean
+                brand_category_product:
+                  type: boolean
+                viewing_editing_marketplace_settings:
+                  type: boolean
+        point_of_sale:
+          type: object
+          additionalProperties: false
+          properties:
+            allow_access_pos:
+              type: boolean
+            terminal_permissions:
+              type: object
+              additionalProperties: false
+              properties:
+                view_terminal_status:
+                  type: boolean
+                terminal_open_close:
+                  type: boolean
+                see_sales_transactions:
+                  type: boolean
+                access_pos_settings:
+                  type: boolean
+            sale_permissions:
+              type: object
+              additionalProperties: false
+              properties:
+                refund:
+                  type: boolean
+                cancellation_of_sales:
+                  type: boolean
+                update_payment_type:
+                  type: boolean
+                update_custom_price:
+                  type: boolean
+                park_deletion:
+                  type: boolean
+                basket_deletion:
+                  type: boolean
+            product_permissions:
+              type: object
+              additionalProperties: false
+              properties:
+                add_remove_favorite:
+                  type: boolean
+                allow_see_others_branches:
+                  type: boolean
+            discount_rates:
+              type: object
+              additionalProperties: false
+              properties:
+                product_discount_limit:
+                  type: number
+                cart_discount_limit:
+                  type: number
+    AddRole:
+      title: Add Role
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        back_office:
+          type: object
+          additionalProperties: false
+          properties:
+            allow_access_backoffice:
+              type: boolean
+              default: false
+            product_permissions:
+              type: object
+              additionalProperties: false
+              properties:
+                products_descriptions:
+                  type: boolean
+                  default: false
+                editing_products:
+                  type: boolean
+                  default: false
+                editing_definitions:
+                  type: boolean
+                  default: false
+                see_products_ingredients:
+                  type: boolean
+                  default: false
+            customer_permissions:
+              type: object
+              additionalProperties: false
+              properties:
+                seeing_customers:
+                  type: boolean
+                  default: false
+                editing_customers:
+                  type: boolean
+                  default: false
+            inventory_permissions:
+              type: object
+              additionalProperties: false
+              properties:
+                inventory_viewing_editing:
+                  type: boolean
+                  default: false
+                inventory_validation:
+                  type: boolean
+                  default: false
+            employee_permissions:
+              type: object
+              additionalProperties: false
+              properties:
+                seeing_employees:
+                  type: boolean
+                  default: false
+                editing_employees:
+                  type: boolean
+                  default: false
+            other_permissions:
+              type: object
+              additionalProperties: false
+              properties:
+                view_reports:
+                  type: boolean
+                  default: false
+                setting_access:
+                  type: boolean
+                  default: false
+                update_payment_type:
+                  type: boolean
+                  default: false
+            marketplace_permissions:
+              type: object
+              additionalProperties: false
+              properties:
+                viewing_orders:
+                  type: boolean
+                  default: false
+                approval_orders:
+                  type: boolean
+                  default: false
+                authority_to_create_invoice:
+                  type: boolean
+                  default: false
+                brand_category_product:
+                  type: boolean
+                  default: false
+                viewing_editing_marketplace_settings:
+                  type: boolean
+                  default: false
+        point_of_sale:
+          type: object
+          additionalProperties: false
+          properties:
+            allow_access_pos:
+              type: boolean
+              default: false
+            terminal_permissions:
+              type: object
+              additionalProperties: false
+              properties:
+                view_terminal_status:
+                  type: boolean
+                  default: false
+                terminal_open_close:
+                  type: boolean
+                  default: false
+                see_sales_transactions:
+                  type: boolean
+                  default: false
+                access_pos_settings:
+                  type: boolean
+                  default: false
+            sale_permissions:
+              type: object
+              additionalProperties: false
+              properties:
+                refund:
+                  type: boolean
+                  default: false
+                cancellation_of_sales:
+                  type: boolean
+                  default: false
+                update_payment_type:
+                  type: boolean
+                  default: false
+                update_custom_price:
+                  type: boolean
+                  default: false
+                park_deletion:
+                  type: boolean
+                  default: false
+                basket_deletion:
+                  type: boolean
+                  default: false
+            product_permissions:
+              type: object
+              additionalProperties: false
+              properties:
+                add_remove_favorite:
+                  type: boolean
+                  default: false
+                allow_see_others_branches:
+                  type: boolean
+                  default: false
+            discount_rates:
+              type: object
+              additionalProperties: false
+              properties:
+                product_discount_limit:
+                  type: number
+                  default: 0
+                cart_discount_limit:
+                  type: number
+                  default: 0
+      required:
+        - name
+    GetPurchase:
+      title: GetPurchase
+      type: object
+      properties:
+        _id:
+          type: string
+        tenant:
+          type: string
+        employee:
+          type: string
+        infos:
+          type: object
+          properties:
+            purchase_number:
+              type: string
+            expected_arrival_date:
+              type: string
+              format: date
+            vendor:
+              type: string
+            branch_to_be_shipped:
+              type: string
+            invoice_number:
+              type: string
+            billing_date:
+              type: string
+              format: date
+            status:
+              type: string
+              enum:
+                - '''waiting_for_approval'''
+                - '''waiting_for_transfer'''
+                - '''partially_completed'''
+                - '''completed'''
+            description:
+              type: string
+        products:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              status:
+                type: object
+                properties:
+                  waiting:
+                    type: boolean
+                    default: true
+                  received:
+                    type: number
+                    default: 0
+                  not_received:
+                    type: number
+                    default: 0
+                  damaged:
+                    type: number
+                    default: 0
+              quantity:
+                type: number
+              unit_price:
+                type: number
+              tax:
+                type: number
+              sub_total:
+                type: string
+        cart_discount:
+          type: number
+        total_price:
+          type: number
+    AddPurchase:
+      title: AddPurchase
+      type: object
+      properties:
+        '':
+          type: object
+          properties:
+            purchase_number:
+              type: string
+            expected_arrival_date:
+              type: string
+              format: date
+            vendor:
+              type: string
+            branch_to_be_shipped:
+              type: string
+            invoice_number:
+              type: string
+            billing_date:
+              type: string
+              format: date
+            status:
+              type: string
+              enum:
+                - '''waiting_for_approval'''
+                - '''waiting_for_transfer'''
+            description:
+              type: string
+          required:
+            - branch_to_be_shipped
+        products:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              quantity:
+                type: number
+              unit_price:
+                type: number
+              tax:
+                type: number
+        cart_discount:
+          type: number
+    UpdatePurchase:
+      title: UpdatePurchase
+      type: object
+      properties:
+        '':
+          type: object
+          properties:
+            purchase_number:
+              type: string
+            expected_arrival_date:
+              type: string
+              format: date
+            vendor:
+              type: string
+            branch_to_be_shipped:
+              type: string
+            invoice_number:
+              type: string
+            billing_date:
+              type: string
+              format: date
+            status:
+              type: string
+              enum:
+                - waiting_for_approval
+                - waiting_for_transfer
+            description:
+              type: string
+          required:
+            - branch_to_be_shipped
+        products:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              status:
+                type: object
+                properties:
+                  waiting:
+                    type: boolean
+                    default: true
+                  received:
+                    type: number
+                    default: 0
+                  not_received:
+                    type: number
+                    default: 0
+                  damaged:
+                    type: number
+                    default: 0
+              quantity:
+                type: number
+              unit_price:
+                type: number
+              tax:
+                type: number
+        cart_discount:
+          type: number
+    AddVendor:
+      title: AddVendor
+      type: object
+      properties:
+        name:
+          type: string
+        legal_title:
+          type: string
+        contact_person:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+          format: email
+        note:
+          type: string
+        address:
+          type: string
+        balance:
+          type: number
+      required:
+        - name
+    GetVendor:
+      title: GetVendor
+      type: object
+      properties:
+        _id:
+          type: string
+        tenant:
+          type: string
+        name:
+          type: string
+        legal_title:
+          type: string
+        contact_person:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+          format: email
+        note:
+          type: string
+        address:
+          type: string
+        balance:
+          type: number
+    UpdateVendor:
+      title: UpdateVendor
+      type: object
+      properties:
+        name:
+          type: string
+        legal_title:
+          type: string
+        contact_person:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+          format: email
+        note:
+          type: string
+        address:
+          type: string
+    AddTransfer:
+      title: AddTransfer
+      type: object
+      properties:
+        details:
+          type: object
+          properties:
+            transfer_number:
+              type: string
+            issue_date:
+              type: string
+              format: date-time
+            expected_transfer_date:
+              type: string
+              format: date-time
+            branch_source:
+              type: string
+            branch_target:
+              type: string
+            note:
+              type: string
+          required:
+            - expected_transfer_date
+            - branch_source
+        products:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              quantities:
+                type: object
+                properties:
+                  requested:
+                    type: number
+                required:
+                  - requested
+            required:
+              - id
+    GetTransfer:
+      title: GetTransfer
+      type: object
+      properties:
+        tenant:
+          type: string
+        employee:
+          type: object
+          properties:
+            id:
+              type: string
+            firstname:
+              type: string
+            lastname:
+              type: string
+        details:
+          type: object
+          properties:
+            transfer_number:
+              type: string
+            issue_date:
+              type: string
+              format: date-time
+            expected_transfer_date:
+              type: string
+              format: date-time
+            branch_source:
+              type: object
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+            branch_target:
+              type: object
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+            status:
+              type: string
+              default: waiting_for_approval
+              enum:
+                - waiting_for_approval
+                - waiting_transfer
+                - completed
+            note:
+              type: string
+        products:
+          type: array
+          items:
+            type: object
+            properties:
+              product:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+              status:
+                type: string
+                default: waiting
+                enum:
+                  - waiting
+                  - received
+                  - not_received
+                  - distinct
+                  - damaged
+              quantities:
+                type: object
+                properties:
+                  requested:
+                    type: number
+                  received:
+                    type: number
+                  not_received:
+                    type: number
+                  damaged:
+                    type: number
+    UpdateTransfer:
+      title: UpdateTransfer
+      type: object
+      properties:
+        details:
+          type: object
+          properties:
+            transfer_number:
+              type: string
+            issue_date:
+              type: string
+              format: date-time
+            expected_transfer_date:
+              type: string
+              format: date-time
+            branch_source:
+              type: string
+            branch_target:
+              type: string
+            status:
+              type: string
+              default: waiting_for_approval
+              enum:
+                - waiting_for_approval
+                - waiting_transfer
+                - completed
+            note:
+              type: string
+          required:
+            - branch_source
+            - branch_target
+            - status
+        products:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              status:
+                type: string
+                default: waiting
+                enum:
+                  - waiting
+                  - received
+                  - not_received
+                  - distinct
+                  - damaged
+              quantities:
+                type: object
+                properties:
+                  requested:
+                    type: number
+                  received:
+                    type: number
+                  not_received:
+                    type: number
+                  damaged:
+                    type: number
+    AddTreasuryTransactionCategory:
+      title: AddTreasuryTransactionCategory
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - collection
+            - disbursement
+      required:
+        - name
+        - type
+    GetTreasuryTransactionCategory:
+      title: GetTreasuryTransactionCategory
+      type: object
+      properties:
+        id:
+          type: string
+        tenant:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - collection
+            - disbursement
+    UpdateTreasuryTransactionCategory:
+      title: UpdateTreasuryTransactionCategory
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - collection
+            - disbursement
+      required:
+        - name
+        - type
+    GetCashFlowTransaction:
+      title: GetCashFlowTransaction
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - collection
+            - disbursment
+        amount:
+          type: number
+        tax:
+          type: number
+        billing_date:
+          type: string
+          format: date-time
+        payment_date:
+          type: string
+          format: date
+        status:
+          type: string
+          enum:
+            - underway
+            - completed
+        overdue:
+          type: boolean
+        category:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+        note:
+          type: string
+    AddCashFlowTransaction:
+      title: AddCashFlowTransaction
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - collection
+            - disbursment
+        amount:
+          type: number
+        tax:
+          type: number
+        billing_date:
+          type: string
+          format: date-time
+        payment_date:
+          type: string
+          format: date
+        status:
+          type: string
+          enum:
+            - underway
+            - completed
+        category:
+          type: string
+        note:
+          type: string
+      required:
+        - name
+        - type
+        - amount
+        - category
+    UpdateCashFlowTransaction:
+      title: UpdateCashFlowTransaction
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - collection
+            - disbursment
+        amount:
+          type: number
+        tax:
+          type: number
+        billing_date:
+          type: string
+          format: date-time
+        payment_date:
+          type: string
+          format: date
+        status:
+          type: string
+          enum:
+            - underway
+            - completed
+        category:
+          type: string
+        note:
+          type: string
+  securitySchemes:
+    Admin Api Key:
+      name: admin_api_key
+      type: apiKey
+      in: header
+    Tenant User Api Key:
+      name: tenant_user_api_key
+      type: apiKey
+      in: header
+  requestBodies:
+    AddRole:
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            $ref: '#/components/schemas/AddRole'
+    UpdateRole:
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            $ref: '#/components/schemas/UpdateRole'
+    AddEmployee:
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            $ref: '#/components/schemas/AddEmployee'
+    UpdateEmployee:
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            $ref: '#/components/schemas/UpdateEmployee'
+        application/json:
+          schema:
+            type: object
+            properties: {}
+    AddPurchase:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AddPurchase'
+    UpdatePurchase:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdatePurchase'
+    AddVendor:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AddVendor'
+    UpdateVendor:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateVendor'
+    AddTransfer:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AddTransfer'
+    UpdateTransfer:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateTransfer'
+    AddTreasuryTransactionCategory:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AddTreasuryTransactionCategory'
+    UpdateTreasuryTransactionsCategory:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateTreasuryTransactionCategory'
+    AddCashFlowTransaction:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AddCashFlowTransaction'
+        application/xml:
+          schema:
+            type: object
+            properties: {}
+        multipart/form-data:
+          schema:
+            type: object
+            properties: {}
+    UpdateCashFlowTransaction:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateCashFlowTransaction'
+  parameters:
+    id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+    limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: string
+    name:
+      name: name
+      in: query
+      required: true
+      schema:
+        type: string
+  responses:
+    GetRoles:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+              count:
+                type: integer
+              currentPage:
+                type: integer
+              pages:
+                type: integer
+              prev:
+                type: integer
+              next:
+                type: integer
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetRole'
+    ResponseMessage:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: string
+              message:
+                type: string
+    GetEmployees:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+              count:
+                type: integer
+              currentPage:
+                type: integer
+              pages:
+                type: integer
+              prev:
+                type: string
+                format: uri
+                nullable: true
+              next:
+                type: string
+                format: uri
+                nullable: true
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetEmployee'
+    GetEmployee:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GetEmployee'
+    GetEmployeesByRole:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+              count:
+                type: integer
+              currentPage:
+                type: integer
+              pages:
+                type: integer
+              prev:
+                type: integer
+              next:
+                type: integer
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetEmployee'
+    GetPurchases:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+              count:
+                type: integer
+              currentPage:
+                type: integer
+              pages:
+                type: integer
+              prevPage:
+                type: string
+                format: uri
+                nullable: true
+              nextPage:
+                type: string
+                format: uri
+                nullable: true
+              data:
+                $ref: '#/components/schemas/GetPurchase'
+    GetPurchase:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GetPurchase'
+    GetVendor:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GetVendor'
+    GetVendors:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+              count:
+                type: integer
+              currentPage:
+                type: integer
+              pages:
+                type: integer
+              prev:
+                type: string
+                format: uri
+                nullable: true
+              next:
+                type: string
+                format: uri
+                nullable: true
+              data:
+                $ref: '#/components/schemas/GetVendor'
+    GetTransfer:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GetTransfer'
+    GetTransfers:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+              count:
+                type: integer
+              currentPage:
+                type: integer
+              pages:
+                type: integer
+              prev:
+                type: string
+                format: uri
+                nullable: true
+              next:
+                type: string
+                format: uri
+                nullable: true
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetTransfer'
+    GetTreasuryTransactionCategory:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GetTreasuryTransactionCategory'
+    GetTreasuryTransactionCategories:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/GetTreasuryTransactionCategory'
+    GetCashFlowTransaction:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GetCashFlowTransaction'
+    GetCashFlowTransactions:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+              count:
+                type: integer
+              currentPage:
+                type: integer
+              pages:
+                type: integer
+              prev:
+                type: string
+                format: uri
+                nullable: true
+              next:
+                type: string
+                format: uri
+                nullable: true
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetCashFlowTransaction'
+tags:
+  - name: Admins
+  - name: Branches
+  - name: Employees
+  - name: Tenants
+  - name: CustomersGroups
+  - name: Customers
+  - name: PaymentTypes
+  - name: Roles
+  - name: Purchases
+  - name: Vendors
+  - name: Transfers
+  - name: Treasury Transaction Category
+  - name: Cash Flow Transactions
